@@ -598,6 +598,98 @@ function displayGr() {
   return $grList;
 }
 
+// Add room function
+function addRm() {
+  include 'includes/cdnj.inc.dbh.php';
+
+  if(isset($_POST['addRm'])) {
+    $addRmInfo = [
+      'rmN' => trim($_POST['rmName']),
+      'rmL' => trim($_POST['rmLocation']),
+      'rmD' => trim($_POST['rmDesc']),
+      'rmM' => $_POST['rmMaxPersons'],
+      'rmSAT' => $_POST['rmStartAvailTime'],
+      'rmEAT' => $_POST['rmEndAvailTime'],
+      'rmP' => $_POST['rmPiano']
+    ];
+    
+    $st = $conn->prepare("INSERT INTO rmlist (rmName, rmLocation, rmDesc, rmMaxPersons, rmStartAvailTime, rmEndAvailTime, rmPiano) VALUES (:rmName, :rmLocation, :rmDesc, :rmMaxPersons, :rmStartAvailTime, :rmEndAvailTime, :rmPiano)");
+
+    $st->bindParam(':rmName',$addRmInfo['rmN']);
+    $st->bindParam(':rmLocation',$addRmInfo['rmL']);
+    $st->bindParam(':rmDesc',$addRmInfo['rmD']);
+    $st->bindParam(':rmMaxPersons',$addRmInfo['rmM']);
+    $st->bindParam(':rmStartAvailTime',$addRmInfo['rmSAT']);
+    $st->bindParam(':rmEndAvailTime',$addRmInfo['rmEAT']);
+    $st->bindParam(':rmPiano',$addRmInfo['rmP']);
+
+    $st->execute();
+    echo ("<script> window.location = './add_rm.php'; </script>") ;
+  }
+}
+
+// Update Room function
+function updateRm() {
+  include 'includes/cdnj.inc.dbh.php';
+
+  if (isset($_POST['edRm'])) {
+    $updateRmInfo = [
+      'rmId' => $_POST['rmId'],
+      'rmN' => trim($_POST['rmName']),
+      'rmL' => trim($_POST['rmLocation']),
+      'rmD' => trim($_POST['rmDesc']),
+      'rmM' => $_POST['rmMaxPersons'],
+      'rmSAT' => $_POST['rmStartAvailTime'],
+      'rmEAT' => $_POST['rmEndAvailTime'],
+      'rmP' => $_POST['rmPiano']
+    ];
+
+    $_SESSION['msg'] = "The record, " . $updateRmInfo['rmN'] . " has been updated";
+
+    //Our UPDATE SQL statement.
+    $sql = "UPDATE rmlist SET rmName = :rmName, rmLocation = :rmLocation, rmDesc = :rmDesc, rmMaxPersons = :rmMaxPersons, rmStartAvailTime = :rmStartAvailTime, rmEndAvailTime = :rmEndAvailTime, rmPiano = :rmPiano  WHERE rmId = :rmId";
+
+    // Prepare our UPDATE SQL statement.
+    $st = $conn->prepare($sql);
+
+    // Bind values to the parameters.
+    $st->bindParam(':rmName',$updateRmInfo['rmN']);
+    $st->bindParam(':rmLocation',$updateRmInfo['rmL']);
+    $st->bindParam(':rmDesc',$updateRmInfo['rmD']);
+    $st->bindParam(':rmMaxPersons',$updateRmInfo['rmM']);
+    $st->bindParam(':rmStartAvailTime',$updateRmInfo['rmSAT']);
+    $st->bindParam(':rmEndAvailTime',$updateRmInfo['rmEAT']);
+    $st->bindParam(':rmPiano',$updateRmInfo['rmP']);
+    $st->bindParam(':rmId',$updateRmInfo['rmId']);
+
+    //Execute UPDATE statement.
+    $st->execute();
+    echo ("<script> window.location = './add_rm.php'; </script>") ;
+  }
+}
+
+// Get update room ID
+function updateRmId() {
+  include 'includes/cdnj.inc.dbh.php';
+
+  if (isset($_GET['edit'])) { // Get id from url
+    $rmId = $_GET['edit'];
+
+    $query = $conn->query("SELECT * FROM rmlist WHERE rmId = $rmId");
+    $record = $query->fetch(PDO::FETCH_ASSOC);
+
+    $rmN = $record['rmName'];
+    $rmL = $record['rmLocation'];
+    $rmD = $record['rmDesc'];
+    $rmM = $record['rmMaxPersons'];
+    $rmSAT = $record['rmStartAvailTime'];
+    $rmEAT = $record['rmEndAvailTime'];
+    $rmP = $record['rmPiano'];
+    $rmId = $record['rmId'];
+    $edit_state = true;
+ }
+}
+
 // Add groups function.
 function addGr() {
   include 'includes/cdnj.inc.dbh.php';
@@ -624,7 +716,6 @@ function addGr() {
 // Update group function.
 function updateGr() {
   include 'includes/cdnj.inc.dbh.php';
-
 
   $grName = trim($_POST['grName']);
   $grParent = trim($_POST['grParent']);

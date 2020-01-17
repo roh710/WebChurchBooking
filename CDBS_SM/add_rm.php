@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_info'])) {
 }
 require 'includes/cdnj.inc.dbh.php';
 require_once 'header.php';
+include 'includes/functions.inc.cdbs.php';
 
    // initialize variables
    $rmN = "";
@@ -21,62 +22,11 @@ require_once 'header.php';
 	$rmId = "";
    $edit_state = false;
 
-   // if save button is clicked
-   if(isset($_POST['addRm'])) {
-   	$rmN = trim($_POST['rmName']);
-   	$rmL = trim($_POST['rmLocation']);
-   	$rmD = trim($_POST['rmDesc']);
-   	$rmM = $_POST['rmMaxPersons'];
-   	$rmSAT = $_POST['rmStartAvailTime'];
-   	$rmEAT = $_POST['rmEndAvailTime'];
-   	$rmP = $_POST['rmPiano'];
+   // Call function addRm()
+   addRm();
 
-      $st = $conn->prepare("INSERT INTO rmlist (rmName, rmLocation, rmDesc, rmMaxPersons, rmStartAvailTime, rmEndAvailTime, rmPiano) VALUES (:rmName, :rmLocation, :rmDesc, :rmMaxPersons, :rmStartAvailTime, :rmEndAvailTime, :rmPiano)");
-
-   	$st->bindParam(':rmName',$rmN);
-   	$st->bindParam(':rmLocation',$rmL);
-   	$st->bindParam(':rmDesc',$rmD);
-   	$st->bindParam(':rmMaxPersons',$rmM);
-   	$st->bindParam(':rmStartAvailTime',$rmSAT);
-   	$st->bindParam(':rmEndAvailTime',$rmEAT);
-   	$st->bindParam(':rmPiano',$rmP);
-
-   	$st->execute();
-      echo ("<script> window.location = './add_rm.php'; </script>") ;
-   }
-
-   // Update record
-   if (isset($_POST['edRm'])) {
-		$rmId = $_POST['rmId'];
-      $rmN = trim($_POST['rmName']);
-   	$rmL = trim($_POST['rmLocation']);
-   	$rmD = trim($_POST['rmDesc']);
-   	$rmM = $_POST['rmMaxPersons'];
-   	$rmSAT = $_POST['rmStartAvailTime'];
-   	$rmEAT = $_POST['rmEndAvailTime'];
-   	$rmP = $_POST['rmPiano'];
-      $_SESSION['msg'] = "The record, " . $rmN . " has been updated";
-
-      //Our UPDATE SQL statement.
-      $sql = "UPDATE rmlist SET rmName = :rmName, rmLocation = :rmLocation, rmDesc = :rmDesc, rmMaxPersons = :rmMaxPersons, rmStartAvailTime = :rmStartAvailTime, rmEndAvailTime = :rmEndAvailTime, rmPiano = :rmPiano  WHERE rmId = :rmId";
-
-      // Prepare our UPDATE SQL statement.
-      $st = $conn->prepare($sql);
-
-		// Bind values to the parameters.
-      $st->bindParam(':rmName',$rmN);
-   	$st->bindParam(':rmLocation',$rmL);
-   	$st->bindParam(':rmDesc',$rmD);
-   	$st->bindParam(':rmMaxPersons',$rmM);
-   	$st->bindParam(':rmStartAvailTime',$rmSAT);
-   	$st->bindParam(':rmEndAvailTime',$rmEAT);
-		$st->bindParam(':rmPiano',$rmP);
-		$st->bindParam(':rmId',$rmId);
-
-      //Execute UPDATE statement.
-      $update = $st->execute();
-      echo ("<script> window.location = './add_rm.php'; </script>") ;
-   }
+   // Call function updateRm()
+   updateRm();
 
    if (isset($_GET['edit'])) { // Get id from url
       $rmId = $_GET['edit'];
