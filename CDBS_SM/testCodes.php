@@ -21,7 +21,7 @@ foreach ($asgnEvts as $key => $value) {
   print_r($value);
   echo "</pre><br>";
 }
-// echo $asgnEvts[1][0]; 
+// echo $asgnEvts[1][0];
 ?>
 
 <!DOCTYPE html>
