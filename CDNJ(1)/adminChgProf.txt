@@ -1,0 +1,144 @@
+<?php
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+require "includes/cdnj.inc.dbh.php";
+include "includes/common.php";
+require_once "header.php";
+require "includes/functions.inc.cdbs.php";
+
+// Initialize
+$msg = "";
+
+// Get user_id from url
+if (isset($_GET['edit'])) {
+  $uId = $_GET['edit'];
+}
+
+// To be used for populating Group-list drop-down list
+// $uPermLevel = "User";
+if ($_SESSION['uPermission'] == "Admin") {
+  $grResults = $conn->prepare(
+    "SELECT grId, grName
+       FROM cdnj_group
+   ORDER BY grName");
+  $grResults->bindParam(':user_perm_level', $_SESSION['uPermission']);
+  $grResults->execute();
+} else {
+  $grResults = $conn->prepare(
+    "SELECT grId, grName
+       FROM cdnj_group
+      WHERE user_perm_level = :user_perm_level
+   ORDER BY grName");
+  $grResults->bindParam(':user_perm_level', $_SESSION['uPermission']);
+  $grResults->execute();
+}
+
+if (isset($_SESSION['user_info'])) {
+  $user = $conn->prepare("SELECT * 
+  FROM users
+  JOIN cdnj_group
+  ON users.user_group_fk = cdnj_group.grId 
+  WHERE user_id = :user_id");
+    $user->bindParam(':user_id', $uId);
+    $user->execute();
+    $result = $user->fetch(PDO::FETCH_ASSOC);
+
+    $uId = $_GET['edit'];
+    $fName = $result['user_firstname'];
+    $lName = $result['user_lastname'];
+    $kName = $result['user_kor_name'];
+    $uTitle = $result['user_title'];
+    $cellPhone = $result['cellPhoneNum'];
+    $uEmail = $result['user_email'];
+    $uName = $result['user_name'];
+    $grName = $result['grName'];
+} else {
+  header('location: ./adminChgProf.php');
+  exit();
+}
+
+if (isset($_POST['update'])) {
+  if ($_POST['user_pswd'] == $_POST['user_pswd_rpt']) {
+    
+    $user_info = [
+      "user_id"        => $uId,
+      "user_firstname" => $_POST['user_firstname'],
+      "user_lastname"  => $_POST['user_lastname'],
+      "user_email"     => $_POST['user_email'],
+      "cellPhoneNum"   => $_POST['cellPhoneNum'],
+      "user_group_fk"  => $_POST['uGroup'],
+      "user_kor_name"  => $_POST['user_kor_name'],
+      "user_title"     => $_POST['user_title'],
+      "user_name"      => $_POST['user_name'],
+      "user_pwd"       => password_hash($_POST['user_pswd'], PASSWORD_BCRYPT),
+    ];
+    
+    updateUserProf($user_info);
+  }
+}
+?>
+<!-- <?php echo $_SESSION['uGrId']; ?> -->
+<!-- <div class="u-profile">
+  <form class="u-profile-form" action="adminChgProf.php" method="post">
+  </form>
+</div> -->
+
+?>
+<div class="input-form">
+  <form method="POST" action="adminChgProf.php">
+    <h3>프로필 편집</h3>
+  <div>
+    <label for="name">이름(영문):</label>
+    <input class="input-form input-style1" type="text" id="name" name="user_firstname" pattern="[a-zA-Z\-]+" value="<?php echo $fName ?>">
+    <input class="input-form input-style1" type="text" name="user_lastname" pattern="[a-zA-Z\-]+" value="<?php echo $lName ?>">
+  </div>
+  <div>
+    <label for="user_kor_name">한글이름/직분:</label>
+    <input class="input-form input-style1" style="ime-mode:active;" type="text" id="user_kor_name" name="user_kor_name" pattern="[가-힣]+" value="<?php echo $kName ?>">
+    <input class="input-form input-style1" style="ime-mode:active;" type="text" name="user_title" pattern="[가-힣]+" value="<?php echo $uTitle ?>">
+  </div>
+  <div>
+    <label for="cellPhoneNum">휴대전화:</label>
+    <input type="text" id="cellPhoneNum" name="cellPhoneNum" pattern="(?:\(\d{3}\)|\d{3})[- ]?\d{3}[- ]?\d{4}" value="<?php echo $cellPhone ?>">
+  </div>
+  <div>
+    <label for="user_email">이메일:</label>
+    <input type="email" id="user_email" name="user_email" value="<?php echo $uEmail ?>" pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{1,63}$">
+  </div>
+  <div class="clr"></div>
+  <div>
+    <label for="user_name">유저네임:</label>
+    <input type="text" name="user_name" value="<?php echo $_SESSION['uName'] ?>" pattern="(?=^.{6,}$)^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$" title="Must be atleast six character in length, consisting lettes and/or numbers only" required="" autocomplete="off">
+    <!-- <input type="text" id="user_name" name="user_name" value="<?php echo $uName ?>"> -->
+  </div>
+  
+  <div>
+    <label for="uGroup">소속그룹:</label>
+    <select name="uGroup" required="">
+      <option hidden value="">----- Select Group -----</option>
+        <?php foreach ($grResults as $grResult) : ?>
+      <option value="<?php echo escape($grResult["grId"]); ?>" 
+      <?php echo $grResult["grId"] == $_SESSION['uGrId'] ? 'selected':''?>>
+      <?php echo escape($grResult["grName"]); ?>
+      </option>
+        <?php endforeach; ?>
+    </select>
+  </div>
+  <div>
+    <label for="user_pswd">암호:</label>
+    <input type="password" name="user_pswd" pattern="(?=^.{6,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$" title="Must be atleast six characters and must contain atleast one upper case and, one number or special character(s)" required="" autocomplete="off">
+    <!-- <input type="password" name="user_pswd" id="user_pswd"> -->
+  </div>
+  <div>
+    <label for="user_pswd_rtp">암호 반복:</label>
+    <input type="password" name="user_pswd_rpt" id="user_pswd_rtp">
+  </div>
+  <div class="add_btn">
+    <input type="submit" name="update" value="편집">
+  </div>
+</form>
+</div>
+<?php echo "<br/>"; ?>
+<?php echo "<br/>"; ?>
+<?php echo "<br/>"; ?>
+<?php include 'footer.php'; ?>
