@@ -9,45 +9,31 @@ if (!isset($_SESSION['user_info'])) {
 }
   require 'includes/cdnj.inc.dbh.php';
   require_once 'header.php';
-  include 'includes/functions.inc.cdbs.php'; 
+  include 'includes/functions.inc.cdbs.php';
 
   // initialize variables
-  $grName = "";
-  $grParent = "";
-  $grDesc = "";
-  $grPerm = "";
-  $grId = "";
-  $edit_state = false;
-
-  // if save button is clicked
-  if (isset($_POST['addGr'])) {
+  $grInfo = [
+    'grName' => "",
+    'grParent' => "",
+    'grDesc' => "",
+    'grPerm' => "",
+    'grId' => "",
+    'edit_state' => FALSE
+  ];
 
   // Call function addGr() to add new group
-    addGr();
-
-    $_SESSION['msg'] = $grName . " has been added.";
-    echo ("<script> window.location = './group.php'; </script>") ;
-  }
+  addGr();
 
   if (isset($_GET['edit'])) { // Get id from url
     $grId = $_GET['edit'];
 
-    $query = $conn->query("SELECT * FROM cdnj_group WHERE grId = $grId");
-    $record = $query->fetch(PDO::FETCH_ASSOC);
-    $grName = $record['grName'];
-    $grParent = $record['grParent'];
-    $grDesc = $record['grDesc'];
-    $grPerm = $record['user_perm_level'];
-    $grId = $record['grId'];
-    $edit_state = true;
+    // get Gr ID
+    $grInfo = getGrId($grId);
   }
 
   // Update record
-  if (isset($_POST['edGr'])) {
-    updateGr();
-    echo ("<script> window.location = './group.php'; </script>") ;
-  }
-
+  updateGr();
+  
   // Call function displayGr for populating group-list table.
   $uGroup = displayGr();
 ?>
@@ -56,26 +42,26 @@ if (!isset($_SESSION['user_info'])) {
 <!-- Populating data inside of their fields when edit is cicked -->
 <form method="POST" action="group.php">
 <h6>P</h6>
-<?php if ($edit_state == false): ?>
+<?php if ($grInfo['edit_state'] == FALSE): ?>
    <h3>ADD GROUP FORM</h3>
 <?php else: ?>
    <h3>EDIT GROUP FORM</h3>
 <?php endif ?>
-<input type="hidden" name="grId" value="<?php echo $grId; ?>">
+<input type="hidden" name="grId" value="<?php echo $grInfo['grId']; ?>">
    <div>
       <label>Group Name</label>
-      <input type="text" name="grName" required="" value="<?php echo $grName; ?>">
+      <input type="text" name="grName" required="" value="<?php echo $grInfo['grName']; ?>">
    </div>
    <div>
       <label>Parent</label>
-      <input type="text" name="grParent" required="" value="<?php echo $grParent; ?>">
+      <input type="text" name="grParent" required="" value="<?php echo $grInfo['grParent']; ?>">
    </div>
    <div>
       <label>Description</label>
-      <input type="text" name="grDesc" required="" value="<?php echo $grDesc; ?>">
+      <input type="text" name="grDesc" required="" value="<?php echo $grInfo['grDesc']; ?>">
    </div>
    <div>
-   <?php if ($edit_state == false): ?>
+   <?php if ($grInfo['edit_state'] == FALSE): ?>
       <div class="add_btn">
         <input type="submit" name="addGr" value="ADD GROUP">
       </div>

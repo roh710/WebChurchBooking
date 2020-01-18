@@ -343,7 +343,8 @@ function asgnEvts() {
 
 // Function for INSERT booking record if no conflict exist. 
 function confBook($x) {
-  include 'includes/cdnj.inc.dbh.php';  
+  include 'includes/cdnj.inc.dbh.php';
+  
   $sql = "SELECT 
     reservations.reservID,
     reservations.reservDate,
@@ -401,6 +402,95 @@ function confBook($x) {
     "rowCount" => $confRows,
     "reservations" => $conflicts
   );
+}
+
+// Function for INSERT booking record if no conflict exist. 
+function confBook1($x) {
+  include 'includes/cdnj.inc.dbh.php';
+  
+  if (isset($_POST['book'])) {
+    if ($_POST['reservTime'] < $_POST['endTime']) {
+  
+      $reservation = array(
+        "reservDate"    => $_POST['reservDate'],
+        "rmReserv"      => $_POST['rmReserv'],
+        "reservTime"    => $_POST['reservTime'],
+        "endTime"       => $_POST['endTime'],
+        "reservPurpose" => $_POST['reservPurpose'],
+        "reservGroup"   => $_POST['uGroup'],
+        "reservStatus"  => "1"
+      );
+        // call function cocfBook to add booking if there is no conflict! $conf = conflict.
+        $sql = "SELECT 
+          reservations.reservID,
+          reservations.reservDate,
+          CASE DAYOFWEEK(reservDate)
+            WHEN '1' THEN '주  일'
+            WHEN '2' THEN '월요일'
+            WHEN '3' THEN '화요일'
+            WHEN '4' THEN '수요일'
+            WHEN '5' THEN '목요일'
+            WHEN '6' THEN '금요일'
+            ELSE '토요일' 
+          END AS wkDay,
+          rmlist.rmId,
+          rmlist.rmName,
+          TIME_FORMAT(reservations.reservTime, '%l:%i %p') AS st,
+          TIME_FORMAT(reservations.endTime, '%l:%i %p') AS et,
+          reservations.reservPurpose,
+          cdnj_group.grName,
+              If (reservations.reservStatus = False, 'Pending', 'Approved')
+              AS status
+            FROM reservations
+            JOIN rmlist
+              ON reservations.rmReserv = rmlist.rmId
+      LEFT JOIN cdnj_group
+              ON reservations.reservGroup = cdnj_group.grId
+          WHERE reservations.reservDate >= CURRENT_DATE()
+            AND rmReserv = :rmReserv
+            AND reservDate = :reservDate
+            AND (reservTime < :endTime)
+            AND (endTime > :reservTime)
+        ORDER BY reservations.reservTime";
+
+        $statement = $conn->prepare($sql);
+        $statement->bindParam(':rmReserv',$x['rmReserv']);
+        $statement->bindParam(':reservDate',$x['reservDate']);
+        $statement->bindParam(':reservTime',$x['reservTime']);
+        $statement->bindParam(':endTime',$x['endTime']);
+        $statement->execute();
+        $conflicts = $statement->fetchAll();
+        $confRows = $statement->rowCount();
+  
+    if ($confRows == 0) {
+      $sql = sprintf(
+        "INSERT INTO %s (%s) values (%s)",
+        "reservations",
+        implode(", ", array_keys($x)),
+        ":" . implode(", :", array_keys($x))
+        );
+    
+      $statement = $conn->prepare($sql);
+      $statement->execute($x);
+    }
+
+    return array(
+      "rowCount" => $confRows,
+      "reservations" => $conflicts
+  );
+
+  if ($conf['rowCount'] >= 1) {
+    $msg = "<h4>" . $conf['rowCount'] . "개의 예약 충돌이 발견되었습니다!</h4>";
+  // } elseif ($conf['rowCount'] == 1) {
+  //   $msg = "<h4>There is " . $conf['rowCount'] . " conflict!</h4>";
+  }else {
+    $msg = "<h5>예약되었습니다!</h5>";
+  }
+  
+    } else {
+      $msg = '<h4 class="msg">'.'시작시간과 종료시간이 같거나, 시작시간이 종료시간보다 더 늦은 시간입니다. 시간 확인바랍니다.'.'</h4>';
+    }
+  }
 }
 
 // Function to UPDATE booking record if no conflict exist.
@@ -669,76 +759,34 @@ function updateRm() {
 }
 
 // Get update room ID
-function updateRmId() {
+function getRmId($x) {
   include 'includes/cdnj.inc.dbh.php';
 
-  if (isset($_GET['edit'])) { // Get id from url
-    $rmId = $_GET['edit'];
+  $query = $conn->query("SELECT * FROM rmlist WHERE rmId = $x");
+  $record = $query->fetch(PDO::FETCH_ASSOC);
 
-    $query = $conn->query("SELECT * FROM rmlist WHERE rmId = $rmId");
-    $record = $query->fetch(PDO::FETCH_ASSOC);
-
-    $rmN = $record['rmName'];
-    $rmL = $record['rmLocation'];
-    $rmD = $record['rmDesc'];
-    $rmM = $record['rmMaxPersons'];
-    $rmSAT = $record['rmStartAvailTime'];
-    $rmEAT = $record['rmEndAvailTime'];
-    $rmP = $record['rmPiano'];
-    $rmId = $record['rmId'];
-    $edit_state = true;
- }
-}
-
-// Add groups function.
-function addGr() {
-  include 'includes/cdnj.inc.dbh.php';
-
-  $group = [
-    'grName'    => trim($_POST['grName']),
-    'grParent'  => trim($_POST['grParent']),
-    'grDesc'    => trim($_POST['grDesc']),
-    'grPerm'    => "User"
+  $rmInfo = [
+    'rmN'         => $record['rmName'],
+    'rmL'         => $record['rmLocation'],
+    'rmD'         => $record['rmDesc'],
+    'rmM'         => $record['rmMaxPersons'],
+    'rmSAT'       => $record['rmStartAvailTime'],
+    'rmEAT'       => $record['rmEndAvailTime'],
+    'rmP'         => $record['rmPiano'],
+    'rmId'        => $record['rmId'],
+    'edit_state'  => true
   ];
-  
-  // Prepare $stmt.
-  $sql = "INSERT INTO cdnj_group (grName, grParent, grDesc, user_perm_level) VALUES (:grName, :grParent, :grDesc, :user_perm_level)";
-
-  // Prepare & bind parameters.
-  $statement = $conn->prepare($sql);
-  $statement->bindParam(':grName', $group['grName']);
-  $statement->bindParam(':grParent', $group['grParent']);
-  $statement->bindParam(':grDesc', $group['grDesc']);
-  $statement->bindParam(':user_perm_level', $group['grPerm']);
-  $statement->execute();
+  return $rmInfo;
 }
 
-// Update group function.
-function updateGr() {
+// Display rmList 
+// Review: Two functions below are virtually the same. Consider using one or the other after where the functions are called.
+function displayRm() {
   include 'includes/cdnj.inc.dbh.php';
 
-  $grName = trim($_POST['grName']);
-  $grParent = trim($_POST['grParent']);
-  $grDesc = trim($_POST['grDesc']);
-  $grPerm = "User";
-  $grId = $_POST['grId'];
-  
-  $_SESSION['msg'] = "The record, " . $grName . " has been updated";
-
-  $sql = "UPDATE cdnj_group SET grName = :grName, grParent = :grParent, grDesc = :grDesc, user_perm_level = :grPerm WHERE grId = :grId";
-
-  // Prepare our UPDATE SQL statement.
-  $statement = $conn->prepare($sql);
-
-  // Bind values to the parameters.
-  $statement->bindValue(':grName', $grName);
-  $statement->bindValue(':grParent', $grParent);
-  $statement->bindValue(':grDesc', $grDesc);
-  $statement->bindValue(':grPerm', $grPerm);
-  $statement->bindValue(':grId', $grId);
-
-  // Execute UPDATE statement.
-  $statement->execute();
+  $query = "SELECT * FROM rmlist ORDER BY rmName ASC";
+  $results = $conn->query($query);
+  return $results;
 }
 
 // Function to populate room-list table.
@@ -752,6 +800,85 @@ function rmList() {
   $rmList = $statement->fetchAll();
 
   return $rmList;
+}
+
+// Add groups function.
+function addGr() {
+  include 'includes/cdnj.inc.dbh.php';
+
+  if (isset($_POST['addGr'])) {
+    $group = [
+      'grName'    => trim($_POST['grName']),
+      'grParent'  => trim($_POST['grParent']),
+      'grDesc'    => trim($_POST['grDesc']),
+      'grPerm'    => "User"
+    ];
+  
+    // Prepare $stmt.
+    $sql = "INSERT INTO cdnj_group (grName, grParent, grDesc, user_perm_level) VALUES (:grName, :grParent, :grDesc, :user_perm_level)";
+
+    // Prepare & bind parameters.
+    $statement = $conn->prepare($sql);
+    $statement->bindParam(':grName', $group['grName']);
+    $statement->bindParam(':grParent', $group['grParent']);
+    $statement->bindParam(':grDesc', $group['grDesc']);
+    $statement->bindParam(':user_perm_level', $group['grPerm']);
+    $statement->execute();
+
+    $_SESSION['msg'] = $group['grName'] . " has been added.";
+    echo ("<script> window.location = './group.php'; </script>") ;
+  }
+}
+
+// Update group function.
+function updateGr() {
+  include 'includes/cdnj.inc.dbh.php';
+
+  if (isset($_POST['edGr'])) {
+    $grId = $_POST['grId'];
+    $grName = trim($_POST['grName']);
+    $grParent = trim($_POST['grParent']);
+    $grDesc = trim($_POST['grDesc']);
+    $grPerm = 'User';
+    
+    $_SESSION['msg'] = "The record, " . $grName . " has been updated";
+
+    $sql = "UPDATE cdnj_group SET grName = :grName, grParent = :grParent, grDesc = :grDesc, user_perm_level = :grPerm WHERE grId = :grId";
+
+    // Prepare our UPDATE SQL statement.
+    $statement = $conn->prepare($sql);
+
+    // Bind values to the parameters.
+    $statement->bindValue(':grName', $grName);
+    $statement->bindValue(':grParent', $grParent);
+    $statement->bindValue(':grDesc', $grDesc);
+    $statement->bindValue(':grPerm', $grPerm);
+    $statement->bindValue(':grId', $grId);
+
+    // Execute UPDATE statement.
+    $statement->execute();
+    $edit_state = true;
+    echo ("<script> window.location = './group.php'; </script>") ;
+  }
+}
+
+// Get group ID
+function getGrId($x) {
+  include 'includes/cdnj.inc.dbh.php';
+
+  if (isset($_GET['edit'])) { // Get id from url
+    $query = $conn->query("SELECT * FROM cdnj_group WHERE grId = $x");
+    $record = $query->fetch(PDO::FETCH_ASSOC);
+    $grInfo = [
+      'grId' => $_GET['edit'],
+      'grName' => $record['grName'],
+      'grParent' => $record['grParent'],
+      'grDesc' => $record['grDesc'],
+      'grPerm' => $record['user_perm_level'],
+      'edit_state' => TRUE
+    ];
+    return $grInfo;
+  }
 }
 
 // Insert record to user_conn_info

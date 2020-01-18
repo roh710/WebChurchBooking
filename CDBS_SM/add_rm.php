@@ -12,15 +12,17 @@ require_once 'header.php';
 include 'includes/functions.inc.cdbs.php';
 
    // initialize variables
-   $rmN = "";
-	$rmL = "";
-	$rmD = "";
-	$rmM = "";
-	$rmSAT = "";
-	$rmEAT = "";
-	$rmP = "";
-	$rmId = "";
-   $edit_state = false;
+   $rmInfo = [
+      'rmN' => "",
+      'rmL' => "",
+      'rmD' => "",
+      'rmM' => "",
+      'rmSAT' => "",
+      'rmEAT' => "",
+      'rmP' => "",
+      'rmId' => "",
+      'edit_state' => false
+    ];
 
    // Call function addRm()
    addRm();
@@ -28,76 +30,71 @@ include 'includes/functions.inc.cdbs.php';
    // Call function updateRm()
    updateRm();
 
+   
+
    if (isset($_GET['edit'])) { // Get id from url
       $rmId = $_GET['edit'];
 
-      $query = $conn->query("SELECT * FROM rmlist WHERE rmId = $rmId");
-		$record = $query->fetch(PDO::FETCH_ASSOC);
-
-      $rmN = $record['rmName'];
-      $rmL = $record['rmLocation'];
-      $rmD = $record['rmDesc'];
-		$rmM = $record['rmMaxPersons'];
-		$rmSAT = $record['rmStartAvailTime'];
-		$rmEAT = $record['rmEndAvailTime'];
-		$rmP = $record['rmPiano'];
-      $rmId = $record['rmId'];
-      $edit_state = true;
+      // Call function getRmId()
+      $rmInfo = getRmId($rmId);
    }
 
-   $query = "SELECT * FROM rmlist ORDER BY rmName ASC";
-   $results = $conn->query($query);
+   // Call function displayRm()
+   $results = displayRm();
+
+   // $query = "SELECT * FROM rmlist ORDER BY rmName ASC";
+   // $results = $conn->query($query);
 
 ?>
 <div class="input-form">
 <!-- Populating data inside of their fields when edit is pressed -->
    <form method="POST" action="add_rm.php">
    <h6>P</h6>
-   <?php if ($edit_state == false): ?>
+   <?php if ($rmInfo['edit_state'] == false): ?>
       <h3>ADD ROOM FORM</h3>
    <?php else: ?>
       <h3>EDIT ROOM FORM</h3>
    <?php endif ?>
-   <input type="hidden" name="rmId" value="<?php echo $rmId; ?>">
+   <input type="hidden" name="rmId" value="<?php echo $rmInfo['rmId']; ?>">
       <div>
             <label for="rmName">Room Name</label>
-            <input type="text" name="rmName" required="" value="<?php echo $rmN; ?>">
+            <input type="text" name="rmName" required="" value="<?php echo $rmInfo['rmN']; ?>">
       </div>
       <div>
             <label for="rmLocation">Location</label>
-            <input type="text" name="rmLocation" required="" value="<?php echo $rmL; ?>">
+            <input type="text" name="rmLocation" required="" value="<?php echo $rmInfo['rmL']; ?>">
       </div>
       <div>
             <label>Description</label>
-            <input type="text" name="rmDesc" required="" value="<?php echo $rmD; ?>">
+            <input type="text" name="rmDesc" required="" value="<?php echo $rmInfo['rmD']; ?>">
       </div>
       <div>
             <label for="rmMaxPersons">Max Persons</label>
-            <input type="number" name="rmMaxPersons" required="" value="<?php echo $rmM; ?>" required="">
+            <input type="number" name="rmMaxPersons" required="" value="<?php echo $rmInfo['rmM']; ?>" required="">
       </div>
       <div>
             <label for="rmStartAvailTime">SAT</label>
-            <input type="time" name="rmStartAvailTime" value="<?php echo $rmSAT; ?>" required="">
+            <input type="time" name="rmStartAvailTime" value="<?php echo $rmInfo['rmSAT']; ?>" required="">
       </div>
       <div>
             <label for="rmEndAvailTime">EAT</label>
-            <input type="time" name="rmEndAvailTime" value="<?php echo $rmEAT; ?>" required="">
+            <input type="time" name="rmEndAvailTime" value="<?php echo $rmInfo['rmEAT']; ?>" required="">
       </div>
       <div>
       <label for="rmPiano">Piano</label>
       <select name="rmPiano" required="">
-      <?php if ($edit_state == false): ?>
+      <?php if ($rmInfo['edit_state'] == false): ?>
          <option selected hidden value="">--- Has piano? ---</option>
          <option value="1">Yes</option>
          <option value="0">No</option>
       <?php else: ?>
-         <option value="1" <?php echo $rmP == 1 ? 'selected':'' ?>>Yes</option>
-         <option value="0" <?php echo $rmP == 0 ? 'selected':'' ?>>No</option>
+         <option value="1" <?php echo $rmInfo['rmP'] == 1 ? 'selected':'' ?>>Yes</option>
+         <option value="0" <?php echo $rmInfo['rmP'] == 0 ? 'selected':'' ?>>No</option>
       <?php endif ?> 
       </select>
       </div>
       <div>
-      <?php if ($edit_state == false): ?>
+      <?php if ($rmInfo['edit_state'] == false): ?>
          <div class="add_btn">
             <input type="submit" name="addRm" value="ADD ROOM">
          </div>

@@ -40,7 +40,7 @@ if (!isset($_SESSION['user_info'])) {
           <?php echo escape($row["rmPiano"] > 0 ? '*':''); ?>
         <?php endforeach; ?>
       </select>
-    <?php else: ?>
+    <?php else: ?> 
 			<label for="rmReserv">Room/Loc</label>
 			<select name="rmReserv" required oninvalid="setCustomValidity('방 이름을 목록에서 선택해주세요!')" onchange="try{setCustomValidity('')}catch(e){}" />
         <option hidden value=""></option>

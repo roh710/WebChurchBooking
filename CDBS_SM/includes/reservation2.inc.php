@@ -66,33 +66,36 @@ if (isset($_POST['clr'])) {
   echo ("<script> window.location = './reserv_pass.php'; </script>") ;
 }
 
-if (isset($_POST['book'])) {
-  if ($_POST['reservTime'] < $_POST['endTime']) {
+// call function cocfBook to add booking if there is no conflict! $conf = conflict.
+$conf = confBook1($reservation);
 
-    $reservation = array(
-      "reservDate"    => $_POST['reservDate'],
-      "rmReserv"      => $_POST['rmReserv'],
-      "reservTime"    => $_POST['reservTime'],
-      "endTime"       => $_POST['endTime'],
-      "reservPurpose" => $_POST['reservPurpose'],
-      "reservGroup"   => $_POST['uGroup'],
-      "reservStatus"  => "1"
-    );
+// if (isset($_POST['book'])) {
+//   if ($_POST['reservTime'] < $_POST['endTime']) {
 
-    // call function cocfBook to add booking if there is no conflict! $conf = conflict.
-    $conf = confBook($reservation);
-    if ($conf['rowCount'] >= 1) {
-      $msg = "<h4>" . $conf['rowCount'] . "개의 예약 충돌이 발견되었습니다!</h4>";
-    // } elseif ($conf['rowCount'] == 1) {
-    //   $msg = "<h4>There is " . $conf['rowCount'] . " conflict!</h4>";
-    }else {
-      $msg = "<h5>예약되었습니다!</h5>";
-    }
+//     $reservation = array(
+//       "reservDate"    => $_POST['reservDate'],
+//       "rmReserv"      => $_POST['rmReserv'],
+//       "reservTime"    => $_POST['reservTime'],
+//       "endTime"       => $_POST['endTime'],
+//       "reservPurpose" => $_POST['reservPurpose'],
+//       "reservGroup"   => $_POST['uGroup'],
+//       "reservStatus"  => "1"
+//     );
 
-  } else {
-    $msg = '<h4 class="msg">'.'시작시간과 종료시간이 같거나, 시작시간이 종료시간보다 더 늦은 시간입니다. 시간 확인바랍니다.'.'</h4>';
-  }
-}
+//     // call function cocfBook to add booking if there is no conflict! $conf = conflict.
+//     $conf = confBook($reservation);
+//     if ($conf['rowCount'] >= 1) {
+//       $msg = "<h4>" . $conf['rowCount'] . "개의 예약 충돌이 발견되었습니다!</h4>";
+//     // } elseif ($conf['rowCount'] == 1) {
+//     //   $msg = "<h4>There is " . $conf['rowCount'] . " conflict!</h4>";
+//     }else {
+//       $msg = "<h5>예약되었습니다!</h5>";
+//     }
+
+//   } else {
+//     $msg = '<h4 class="msg">'.'시작시간과 종료시간이 같거나, 시작시간이 종료시간보다 더 늦은 시간입니다. 시간 확인바랍니다.'.'</h4>';
+//   }
+// }
 
 
 // get reservation list
