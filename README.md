@@ -96,7 +96,7 @@ In my attempt, below code is what I have so far:
     echo $v." ".$x."<br>";
     }
 
-With heavy modification of above code, below is the output:
+With a heavy modification of above code, below is the output:
 
     Array
     (
