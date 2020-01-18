@@ -304,7 +304,7 @@ php files associated with above:
     includes/functions.inc.cdbs.php
 =======
         
-    php files associated with above:
+    php files associated with the above:
         testCodes.php
         includes/functions.inc.cdbs.php
         
