@@ -11,6 +11,7 @@ CDBS_SM/SQL/create_rm_reserved_view.sql
 CDBS_SM/SQL/create_views.sql
 CDBS_SM/SQL/MySQL_Codes_Samples.sql
 CDBS_SM/SQL/users(2019-10-23).sql
+<<<<<<< HEAD
 Other_practices/connect.php
 Other_practices/connect0.php
 Other_practices/index.php
@@ -21,6 +22,8 @@ Other_practices/reset.css
 Other_practices/CDNJ_new/cdnj.inc.dbh.php
 Other_practices/CDNJ_new/index.php
 Other_practices/CDNJ_new/User.php
+=======
+>>>>>>> 919f295ffc65beb072f47c670dbf286c924c0c8e
 php_lessons/Calculator_v15.php
 php_lessons/convert_date_to_wkday.php
 php_lessons/CRUD.zip
