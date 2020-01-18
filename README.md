@@ -297,7 +297,15 @@ With a heavy modification of above code, below is the output:
         [grName] => Worship
         [eventStat] => 1
         [eventUpdated] => 2020-01-17 22:01:56
+<<<<<<< HEAD
 
 php files associated with above:
     testCodes.php
     includes/functions.inc.cdbs.php
+=======
+        
+    php files associated with above:
+        testCodes.php
+        includes/functions.inc.cdbs.php
+        
+>>>>>>> f3564c2238f835aa84988d650e038a71550ae5f1
