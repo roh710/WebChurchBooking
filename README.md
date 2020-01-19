@@ -127,7 +127,7 @@ With a heavy modification of above code, below is the output:
         [eventDesc] => 
         [grName] => Worship
         [eventUpdated] => 2020-01-17 22:01:56
-        )
+    )
 
     End of conflict.
 
@@ -227,7 +227,7 @@ With a heavy modification of above code, below is the output:
         [grName] => Worship
         [eventStat] => 1
         [eventUpdated] => 2020-01-17 22:01:56
-   )
+    )
 
     Array
     (
@@ -241,7 +241,7 @@ With a heavy modification of above code, below is the output:
         [grName] => Worship
         [eventStat] => 1
         [eventUpdated] => 2020-01-17 22:01:56
-   )
+    )
 
     Array
     (
