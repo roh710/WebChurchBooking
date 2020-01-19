@@ -1,7 +1,7 @@
 # WebChurchBooking
 Web application that reserve rooms in a church bldg written in php.
 
-On going project with OOP in mind and added functionality of the following:
+On going project with OOP in mind and wish to add the following functionality:
 
 I'm using MySQL dB and two tables are named "perm_events" for the repeated events and "reservations" to store the individual events that do not repeat, respectably. The "perm_events" table exists for the sole purpose of NOT having to type in the same information repeatedly. This is a question regarding the "perm_events".
 
