@@ -1,7 +1,7 @@
 # WebChurchBooking
 Web application that reserve rooms in a church bldg written in php.
 
-On going project with OOP in mind and added functionality of the following:
+On going project with OOP in mind and wish to add the following functionality:
 
 I'm using MySQL dB and two tables are named "perm_events" for the repeated events and "reservations" to store the individual events that do not repeat, respectably. The "perm_events" table exists for the sole purpose of NOT having to type in the same information repeatedly. This is a question regarding the "perm_events".
 
@@ -31,7 +31,8 @@ Base on the collected info above, I want to populate a table containing the belo
     12/12/2019  THU   EVENT B     Rm. 1    9:00AM        10:00AM
     12/31/2019  TUE   EVENT B     Rm. 1    9:00AM        10:00AM
 
-Currently, I am entering the ABOVE event as a series of events for the duration from 12/3/2019 through 12/31/2019, as the UI shown below (The below are stored in "reservations" table):
+Currently, I am entering the ABOVE event as a series of events for the duration from 12/3/2019 through 12/31/2019, 
+as the UI shown below (The below are stored in "reservations" table):
 
     event_name: Event B(1)
     location: Rm. 1
@@ -55,19 +56,29 @@ After reserving this event, I'd go on to the next by repeating the process until
 I'd have to do this seemingly endless process until the process is complete (I think there are 8 or 9 in the above example). Moreover, for the permanent events that DO NOT have END DATES, I'd have to continually enter the same event information over-and-over again.
 
 In my attempt, below code is what I have so far:
-
+    
+    <?php
     /* So let's say we store the days of the week as a bit integer, where 
-       1 = Sunday, 2 = Monday, 4 = Wednesday, and 127 = everyday. For the 
-       purposes of this example, I'm going to use Monday and Wednesday (2 and 8) which equals 10
+         1 = Sunday, 
+         2 = Monday,
+         4 = Tuesday
+         8 = Wednesday, 
+        16 = Thursday,
+        32 = Friday,
+        64 = Saturday,
+       127 = everyday. 
+       For the purposes of this example, I'm going to use Monday and Wednesday (2 and 8) which equals 10
     */
 
-    $weekday_bit = 1;
+    $weekday_bit = 10;
 
     /*The following part is actually redundant if use the 'day' option of php's date() function, 
       but someone better at coding than me can show you how to do that...*/
 
     $days = array('Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-    $newdays = array(); //Initialise an array for storing the converted bit representation (so 'Mon','Wed', in this instance.
+    
+    // Initialise an array for storing the converted bit representation (so 'Mon','Wed', in this instance.
+    $newdays = array(); 
 
     // Convert the bitwise integer to an array (Credit to Sammitch for this bit)
     for( $i=0; $i<7; $i++ ) {
@@ -95,6 +106,7 @@ In my attempt, below code is what I have so far:
     if(in_array(date('D', strtotime($v)),$newdays)){$x = 1;} else {$x = 0;}
     echo $v." ".$x."<br>";
     }
+    ?>
 
 With a heavy modification of above code, below is the output:
 
@@ -127,7 +139,7 @@ With a heavy modification of above code, below is the output:
         [eventDesc] => 
         [grName] => Worship
         [eventUpdated] => 2020-01-17 22:01:56
-        )
+    )
 
     End of conflict.
 
@@ -298,6 +310,6 @@ With a heavy modification of above code, below is the output:
         [eventStat] => 1
         [eventUpdated] => 2020-01-17 22:01:56
 
-php files associated with the above:
+    php files associated with the above:
         testCodes.php
         includes/functions.inc.cdbs.php
